@@ -2,9 +2,12 @@ package dao;
 
 import domain.User;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public class UserDao {
+public abstract class UserDao {
 
     public void add(User user) throws SQLException, ClassNotFoundException {
         Connection c = getConnection();
@@ -40,9 +43,6 @@ public class UserDao {
         return user;
     }
 
-    private Connection getConnection() throws ClassNotFoundException, SQLException {
-        Class.forName("com.mysql.jdbc.Driver");
-        return DriverManager.getConnection("jdbc:mysql://localhost/solip_spring", "root", "root");
-    }
+    protected abstract Connection getConnection() throws ClassNotFoundException, SQLException;
 
 }
