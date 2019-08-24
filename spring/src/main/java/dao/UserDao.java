@@ -2,9 +2,7 @@ package dao;
 
 import domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
-import strategy.DeleteAllStatement;
-import strategy.StatementStrategy;
+import strategy.*;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -23,6 +21,11 @@ public class UserDao {
 
     public void deleteAll() throws SQLException {
         StatementStrategy strategy = new DeleteAllStatement();
+        jdbcContextWithStatementStrategy(strategy);
+    }
+
+    public void add(User user) throws SQLException, ClassNotFoundException {
+        StatementStrategy strategy = new AddStatement(user);
         jdbcContextWithStatementStrategy(strategy);
     }
 
@@ -50,90 +53,29 @@ public class UserDao {
     }
 
     public int getCount() throws SQLException {
-        Connection c = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+        StatementStrategy statement = new CountStatement();
+        ResultSetStrategy resultSet = new CountResultSet();
 
-        try {
-            c = dataSource.getConnection();
-            ps = c.prepareStatement("SELECT COUNT(*) FROM USERS");
-
-            rs = ps.executeQuery();
-            rs.next();
-            return rs.getInt(1);
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            if(rs!=null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {}
-            }
-            if(ps!=null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {}
-            }
-            if(c!=null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {}
-            }
-        }
-    }
-
-    public void add(User user) throws SQLException, ClassNotFoundException {
-        Connection c = null;
-        PreparedStatement ps = null;
-
-        try {
-            c = dataSource.getConnection();
-
-            ps = c.prepareStatement("INSERT INTO USERS(ID, NAME, PASSWORD) VALUES(?,?,?)");
-            ps.setString(1, user.getId());
-            ps.setString(2, user.getName());
-            ps.setString(3, user.getPassword());
-
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            if(ps!=null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {}
-            }
-            if(c!=null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {}
-            }
-        }
+        return (Integer) jdbcContextWithStatementStrategyAndResultSetStrategy(statement, resultSet);
     }
 
     public User get(String id) throws SQLException, ClassNotFoundException {
+        StatementStrategy statement = new InfoStatement(id);
+        ResultSetStrategy resultSet = new InfoResultSet();
+
+        return (User)jdbcContextWithStatementStrategyAndResultSetStrategy(statement, resultSet);
+    }
+
+    private <T> T jdbcContextWithStatementStrategyAndResultSetStrategy(StatementStrategy statement, ResultSetStrategy resultSet) throws SQLException {
         Connection c = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
 
         try {
             c = dataSource.getConnection();
-
-            ps = c.prepareStatement("SELECT * FROM USERS WHERE ID=?");
-            ps.setString(1, id);
-
+            ps = statement.makePreparedStatement(c);
             rs = ps.executeQuery();
-            User user = null;
-            if(rs.next()) {
-                user = new User();
-                user.setId(rs.getString("ID"));
-                user.setName(rs.getString("NAME"));
-                user.setPassword(rs.getString("PASSWORD"));
-            }
-            if(user==null) {
-                throw new EmptyResultDataAccessException(1);
-            }
-            return user;
+            return resultSet.getResult(rs);
         } catch (SQLException e) {
             throw e;
         } finally {
