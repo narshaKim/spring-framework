@@ -2,7 +2,9 @@ package dao;
 
 import domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import strategy.*;
+import org.springframework.dao.EmptyResultDataAccessException;
+import strategy.ResultSetStrategy;
+import strategy.StatementStrategy;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -20,12 +22,24 @@ public class UserDao {
     }
 
     public void deleteAll() throws SQLException {
-        StatementStrategy strategy = new DeleteAllStatement();
+        StatementStrategy strategy = new StatementStrategy() {
+            public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+                return c.prepareStatement("DELETE FROM USERS");
+            }
+        };
         jdbcContextWithStatementStrategy(strategy);
     }
 
-    public void add(User user) throws SQLException, ClassNotFoundException {
-        StatementStrategy strategy = new AddStatement(user);
+    public void add(final User user) throws SQLException {
+        StatementStrategy strategy = new StatementStrategy() {
+            public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+                PreparedStatement ps = c.prepareStatement("INSERT INTO USERS(ID, NAME, PASSWORD) VALUES(?,?,?)");
+                ps.setString(1, user.getId());
+                ps.setString(2, user.getName());
+                ps.setString(3, user.getPassword());
+                return ps;
+            }
+        };
         jdbcContextWithStatementStrategy(strategy);
     }
 
@@ -53,15 +67,44 @@ public class UserDao {
     }
 
     public int getCount() throws SQLException {
-        StatementStrategy statement = new CountStatement();
-        ResultSetStrategy resultSet = new CountResultSet();
+        StatementStrategy statement = new StatementStrategy() {
+            public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+                return c.prepareStatement("SELECT COUNT(*) FROM USERS");
+            }
+        };
+        ResultSetStrategy resultSet = new ResultSetStrategy() {
+            public <T> T getResult(ResultSet rs) throws SQLException {
+                rs.next();
+                return (T) (Integer) rs.getInt(1);
+            }
+        };
 
         return (Integer) jdbcContextWithStatementStrategyAndResultSetStrategy(statement, resultSet);
     }
 
-    public User get(String id) throws SQLException, ClassNotFoundException {
-        StatementStrategy statement = new InfoStatement(id);
-        ResultSetStrategy resultSet = new InfoResultSet();
+    public User get(final String id) throws SQLException, ClassNotFoundException {
+        StatementStrategy statement = new StatementStrategy() {
+            public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+                PreparedStatement ps = c.prepareStatement("SELECT * FROM USERS WHERE ID=?");
+                ps.setString(1, id);
+                return ps;
+            }
+        };
+        ResultSetStrategy resultSet = new ResultSetStrategy() {
+            public <T> T getResult(ResultSet rs) throws SQLException {
+                User user = null;
+                if(rs.next()) {
+                    user = new User();
+                    user.setId(rs.getString("ID"));
+                    user.setName(rs.getString("NAME"));
+                    user.setPassword(rs.getString("PASSWORD"));
+                }
+                if(user==null) {
+                    throw new EmptyResultDataAccessException(1);
+                }
+                return (T) user;
+            }
+        };
 
         return (User)jdbcContextWithStatementStrategyAndResultSetStrategy(statement, resultSet);
     }
