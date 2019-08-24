@@ -22,16 +22,15 @@ public class UserDao {
     }
 
     public void deleteAll() throws SQLException {
-        StatementStrategy strategy = new StatementStrategy() {
+        jdbcContextWithStatementStrategy(new StatementStrategy() {
             public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
                 return c.prepareStatement("DELETE FROM USERS");
             }
-        };
-        jdbcContextWithStatementStrategy(strategy);
+        });
     }
 
     public void add(final User user) throws SQLException {
-        StatementStrategy strategy = new StatementStrategy() {
+        jdbcContextWithStatementStrategy(new StatementStrategy() {
             public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
                 PreparedStatement ps = c.prepareStatement("INSERT INTO USERS(ID, NAME, PASSWORD) VALUES(?,?,?)");
                 ps.setString(1, user.getId());
@@ -39,8 +38,7 @@ public class UserDao {
                 ps.setString(3, user.getPassword());
                 return ps;
             }
-        };
-        jdbcContextWithStatementStrategy(strategy);
+        });
     }
 
     private void jdbcContextWithStatementStrategy(StatementStrategy strategy) throws SQLException {
@@ -67,30 +65,26 @@ public class UserDao {
     }
 
     public int getCount() throws SQLException {
-        StatementStrategy statement = new StatementStrategy() {
+        return (Integer) jdbcContextWithStatementStrategyAndResultSetStrategy(new StatementStrategy() {
             public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
                 return c.prepareStatement("SELECT COUNT(*) FROM USERS");
             }
-        };
-        ResultSetStrategy resultSet = new ResultSetStrategy() {
+        }, new ResultSetStrategy() {
             public <T> T getResult(ResultSet rs) throws SQLException {
                 rs.next();
                 return (T) (Integer) rs.getInt(1);
             }
-        };
-
-        return (Integer) jdbcContextWithStatementStrategyAndResultSetStrategy(statement, resultSet);
+        });
     }
 
     public User get(final String id) throws SQLException, ClassNotFoundException {
-        StatementStrategy statement = new StatementStrategy() {
+        return (User)jdbcContextWithStatementStrategyAndResultSetStrategy(new StatementStrategy() {
             public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
                 PreparedStatement ps = c.prepareStatement("SELECT * FROM USERS WHERE ID=?");
                 ps.setString(1, id);
                 return ps;
             }
-        };
-        ResultSetStrategy resultSet = new ResultSetStrategy() {
+        }, new ResultSetStrategy() {
             public <T> T getResult(ResultSet rs) throws SQLException {
                 User user = null;
                 if(rs.next()) {
@@ -104,9 +98,7 @@ public class UserDao {
                 }
                 return (T) user;
             }
-        };
-
-        return (User)jdbcContextWithStatementStrategyAndResultSetStrategy(statement, resultSet);
+        });
     }
 
     private <T> T jdbcContextWithStatementStrategyAndResultSetStrategy(StatementStrategy statement, ResultSetStrategy resultSet) throws SQLException {
