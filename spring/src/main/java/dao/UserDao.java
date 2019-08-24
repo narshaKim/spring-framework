@@ -1,21 +1,22 @@
 package dao;
 
 import domain.User;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class UserDao {
 
     private JdbcTemplate jdbcTemplate;
+
+    RowMapper<User> rowMapper = new RowMapper<User>() {
+        public User mapRow(ResultSet resultSet, int i) throws SQLException {
+            return new User(resultSet.getString("ID"), resultSet.getString("NAME"), resultSet.getString("PASSWORD"));
+        }
+    };
 
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -30,27 +31,18 @@ public class UserDao {
     }
 
     public int getCount() {
-        return jdbcTemplate.query(new PreparedStatementCreator() {
-            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                return connection.prepareStatement("SELECT COUNT(*) FROM USERS");
-            }
-        }, new ResultSetExtractor<Integer>() {
-            public Integer extractData(ResultSet resultSet) throws SQLException, DataAccessException {
-                resultSet.next();
+        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM USERS", new RowMapper<Integer>() {
+            public Integer mapRow(ResultSet resultSet, int i) throws SQLException {
                 return resultSet.getInt(1);
             }
         });
     }
 
     public User get(final String id) {
-        return jdbcTemplate.queryForObject("SELECT * FROM USERS WHERE ID=?", new Object[]{id}, new RowMapper<User>() {
-            public User mapRow(ResultSet resultSet, int i) throws SQLException {
-                User user = new User();
-                user.setId(resultSet.getString("ID"));
-                user.setName(resultSet.getString("NAME"));
-                user.setPassword(resultSet.getString("PASSWORD"));
-                return user;
-            }
-        });
+        return jdbcTemplate.queryForObject("SELECT * FROM USERS WHERE ID=?", new Object[]{id}, this.rowMapper);
+    }
+
+    public List<User> getAll() {
+        return jdbcTemplate.query("SELECT * FROM USERS ORDER BY ID ASC", this.rowMapper);
     }
 }
