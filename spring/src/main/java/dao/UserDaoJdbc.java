@@ -44,6 +44,17 @@ public class UserDaoJdbc implements UserDao {
         );
     }
 
+    public void update(User user) {
+        jdbcTemplate.update("UPDATE USERS SET NAME=?, PASSWORD=?, LEVEL=?, LOGIN=?, RECOMMEND=? WHERE ID=?",
+                user.getName(),
+                user.getPassword(),
+                user.getLevel().intValue(),
+                user.getLogin(),
+                user.getRecommend(),
+                user.getId()
+        );
+    }
+
     public int getCount() {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM USERS", new RowMapper<Integer>() {
             public Integer mapRow(ResultSet resultSet, int i) throws SQLException {
