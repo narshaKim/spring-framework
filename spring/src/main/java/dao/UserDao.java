@@ -6,6 +6,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -42,24 +43,12 @@ public class UserDao {
     }
 
     public User get(final String id) {
-        return jdbcTemplate.query(new PreparedStatementCreator() {
-            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM USERS WHERE ID=?");
-                preparedStatement.setString(1, id);
-                return preparedStatement;
-            }
-        }, new ResultSetExtractor<User>() {
-            public User extractData(ResultSet resultSet) throws SQLException, DataAccessException {
-                User user = null;
-                if (resultSet.next()) {
-                    user = new User();
-                    user.setId(resultSet.getString("ID"));
-                    user.setName(resultSet.getString("NAME"));
-                    user.setPassword(resultSet.getString("PASSWORD"));
-                }
-                if (user == null) {
-                    throw new EmptyResultDataAccessException(1);
-                }
+        return jdbcTemplate.queryForObject("SELECT * FROM USERS WHERE ID=?", new Object[]{id}, new RowMapper<User>() {
+            public User mapRow(ResultSet resultSet, int i) throws SQLException {
+                User user = new User();
+                user.setId(resultSet.getString("ID"));
+                user.setName(resultSet.getString("NAME"));
+                user.setPassword(resultSet.getString("PASSWORD"));
                 return user;
             }
         });

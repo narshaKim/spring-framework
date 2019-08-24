@@ -10,6 +10,7 @@ import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
 import javax.sql.DataSource;
 
+@Deprecated
 @Configuration
 public class DaoFactory {
 
