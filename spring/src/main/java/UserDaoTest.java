@@ -1,4 +1,5 @@
 import dao.UserDao;
+import domain.Level;
 import domain.User;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
@@ -31,9 +32,9 @@ public class UserDaoTest {
 
     @Before
     public void setUp() {
-        this.user1 = new User("bts-jk", "전정국", "jk");
-        this.user2 = new User("bts-rm", "김남준", "rm");
-        this.user3 = new User("bts-v", "김태형", "v");
+        this.user1 = new User("bts-jk", "전정국", "jk", Level.BASIC, 1, 0);
+        this.user2 = new User("bts-rm", "김남준", "rm", Level.SILVER, 55, 10);
+        this.user3 = new User("bts-v", "김태형", "v", Level.GOLD, 100, 40);
     }
 
     @Test(expected = DuplicateKeyException.class)
@@ -45,7 +46,7 @@ public class UserDaoTest {
     }
 
     @Test
-    public void addAndGet() throws SQLException, ClassNotFoundException {
+    public void addAndGet() {
 
         dao.deleteAll();
         Assert.assertThat(dao.getCount(), CoreMatchers.is(0));
@@ -55,12 +56,10 @@ public class UserDaoTest {
         Assert.assertThat(dao.getCount(), CoreMatchers.is(2));
 
         User userget1 = dao.get(user1.getId());
-        Assert.assertThat(userget1.getName(), CoreMatchers.is(user1.getName()));
-        Assert.assertThat(userget1.getPassword(), CoreMatchers.is(user1.getPassword()));
+        checkSameUser(user1, userget1);
 
         User userget2 = dao.get(user2.getId());
-        Assert.assertThat(userget2.getName(), CoreMatchers.is(user2.getName()));
-        Assert.assertThat(userget2.getPassword(), CoreMatchers.is(user2.getPassword()));
+        checkSameUser(user2, userget2);
 
     }
 
@@ -69,7 +68,6 @@ public class UserDaoTest {
         dao.deleteAll();
         List<User> users0 = dao.getAll();
         Assert.assertThat(users0.size(), CoreMatchers.is(0));
-
 
         dao.add(user1);
         List<User> users1 = dao.getAll();
@@ -94,7 +92,9 @@ public class UserDaoTest {
         Assert.assertThat(user1.getId(), CoreMatchers.is(user2.getId()));
         Assert.assertThat(user1.getName(), CoreMatchers.is(user2.getName()));
         Assert.assertThat(user1.getPassword(), CoreMatchers.is(user2.getPassword()));
-
+        Assert.assertThat(user1.getLevel(), CoreMatchers.is(user2.getLevel()));
+        Assert.assertThat(user1.getLogin(), CoreMatchers.is(user2.getLogin()));
+        Assert.assertThat(user1.getRecommend(), CoreMatchers.is(user2.getRecommend()));
     }
 
     @Test(expected = EmptyResultDataAccessException.class)

@@ -1,5 +1,6 @@
 package dao;
 
+import domain.Level;
 import domain.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -14,7 +15,13 @@ public class UserDaoJdbc implements UserDao {
 
     RowMapper<User> rowMapper = new RowMapper<User>() {
         public User mapRow(ResultSet resultSet, int i) throws SQLException {
-            return new User(resultSet.getString("ID"), resultSet.getString("NAME"), resultSet.getString("PASSWORD"));
+            String id = resultSet.getString("ID");
+            String name = resultSet.getString("NAME");
+            String password = resultSet.getString("PASSWORD");
+            Level level = Level.valueOf(resultSet.getInt("LEVEL"));
+            int login = resultSet.getInt("LOGIN");
+            int recommend = resultSet.getInt("RECOMMEND");
+            return new User(id, name, password, level, login, recommend);
         }
     };
 
@@ -27,7 +34,14 @@ public class UserDaoJdbc implements UserDao {
     }
 
     public void add(final User user) {
-        jdbcTemplate.update("INSERT INTO USERS(ID, NAME, PASSWORD) VALUES(?,?,?)", user.getId(), user.getName(), user.getPassword());
+        jdbcTemplate.update("INSERT INTO USERS(ID, NAME, PASSWORD, LEVEL, LOGIN, RECOMMEND) VALUES(?,?,?,?,?,?)",
+                user.getId(),
+                user.getName(),
+                user.getPassword(),
+                user.getLevel().intValue(),
+                user.getLogin(),
+                user.getRecommend()
+        );
     }
 
     public int getCount() {
