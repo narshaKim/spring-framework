@@ -1,7 +1,6 @@
 import dao.UserDao;
 import domain.Level;
 import domain.User;
-import exception.TestUserServiceException;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -13,6 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import service.TestUserService;
 import service.UserService;
 
+import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,6 +28,9 @@ public class UserServiceTest {
 
     @Autowired
     UserDao userDao;
+
+    @Autowired
+    DataSource dataSource;
 
     List<User> users;
 
@@ -66,7 +69,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void upgradeLevels() {
+    public void upgradeLevels() throws Exception {
         userDao.deleteAll();
         for(User user : users) userDao.add(user);
 
@@ -84,6 +87,7 @@ public class UserServiceTest {
     public void upgradeAllOrNothing() {
         UserService testUserService = new TestUserService(users.get(3).getId());
         testUserService.setUserDao(userDao);
+        testUserService.setDataSource(dataSource);
 
         userDao.deleteAll();
         for(User user : users) userDao.add(user);
@@ -91,7 +95,7 @@ public class UserServiceTest {
         try {
             testUserService.upgradeLevels();
             Assert.fail("TestUserServiceException expected");
-        } catch (TestUserServiceException e) {}
+        } catch (Exception e) {}
 
         checkLevelUpgraded(users.get(1), false);
     }
