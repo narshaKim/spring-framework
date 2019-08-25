@@ -5,7 +5,7 @@ import domain.User;
 import exception.TestUserServiceException;
 import org.springframework.mail.MailSender;
 
-public class TestUserService extends UserService {
+public class TestUserService extends UserServiceImpl {
 
     private String id;
 
