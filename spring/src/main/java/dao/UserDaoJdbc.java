@@ -21,7 +21,8 @@ public class UserDaoJdbc implements UserDao {
             Level level = Level.valueOf(resultSet.getInt("LEVEL"));
             int login = resultSet.getInt("LOGIN");
             int recommend = resultSet.getInt("RECOMMEND");
-            return new User(id, name, password, level, login, recommend);
+            String email = resultSet.getString("EMAIL");
+            return new User(id, name, password, level, login, recommend, email);
         }
     };
 
@@ -34,23 +35,25 @@ public class UserDaoJdbc implements UserDao {
     }
 
     public void add(final User user) {
-        jdbcTemplate.update("INSERT INTO USERS(ID, NAME, PASSWORD, LEVEL, LOGIN, RECOMMEND) VALUES(?,?,?,?,?,?)",
+        jdbcTemplate.update("INSERT INTO USERS(ID, NAME, PASSWORD, LEVEL, LOGIN, RECOMMEND, EMAIL) VALUES(?,?,?,?,?,?,?)",
                 user.getId(),
                 user.getName(),
                 user.getPassword(),
                 user.getLevel().intValue(),
                 user.getLogin(),
-                user.getRecommend()
+                user.getRecommend(),
+                user.getEmail()
         );
     }
 
     public void update(User user) {
-        jdbcTemplate.update("UPDATE USERS SET NAME=?, PASSWORD=?, LEVEL=?, LOGIN=?, RECOMMEND=? WHERE ID=?",
+        jdbcTemplate.update("UPDATE USERS SET NAME=?, PASSWORD=?, LEVEL=?, LOGIN=?, RECOMMEND=?, EMAIL=? WHERE ID=?",
                 user.getName(),
                 user.getPassword(),
                 user.getLevel().intValue(),
                 user.getLogin(),
                 user.getRecommend(),
+                user.getEmail(),
                 user.getId()
         );
     }

@@ -32,9 +32,9 @@ public class UserDaoTest {
 
     @Before
     public void setUp() {
-        this.user1 = new User("bts-jk", "전정국", "jk", Level.BASIC, 1, 0);
-        this.user2 = new User("bts-rm", "김남준", "rm", Level.SILVER, 55, 10);
-        this.user3 = new User("bts-v", "김태형", "v", Level.GOLD, 100, 40);
+        this.user1 = new User("bts-jk", "전정국", "jk", Level.BASIC, 1, 0, "bts-jk@solip.com");
+        this.user2 = new User("bts-rm", "김남준", "rm", Level.SILVER, 55, 10, "bts-rm@solip.com");
+        this.user3 = new User("bts-v", "김태형", "v", Level.GOLD, 100, 40, "bts-v@solip.com");
     }
 
     @Test(expected = DuplicateKeyException.class)
@@ -74,6 +74,7 @@ public class UserDaoTest {
         user1.setLevel(Level.GOLD);
         user1.setLogin(1000);
         user1.setRecommend(999);
+        user1.setEmail("jm@solip.com");
         dao.update(user1);
 
         User user1update = dao.get(user1.getId());
@@ -114,6 +115,7 @@ public class UserDaoTest {
         Assert.assertThat(user1.getLevel(), CoreMatchers.is(user2.getLevel()));
         Assert.assertThat(user1.getLogin(), CoreMatchers.is(user2.getLogin()));
         Assert.assertThat(user1.getRecommend(), CoreMatchers.is(user2.getRecommend()));
+        Assert.assertThat(user1.getEmail(), CoreMatchers.is(user2.getEmail()));
     }
 
     @Test(expected = EmptyResultDataAccessException.class)

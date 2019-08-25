@@ -37,11 +37,11 @@ public class UserServiceTest {
     @Before
     public void setUp() {
         users = Arrays.asList(
-                new User("jk", "정국", "jkpassword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER-1, MIN_RECCOMEND_FOR_GOLD-1),
-                new User("jin", "진", "jinpassword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, MIN_RECCOMEND_FOR_GOLD-1),
-                new User("v", "태형", "vpassword", Level.SILVER, MIN_LOGCOUNT_FOR_SILVER, MIN_RECCOMEND_FOR_GOLD-1),
-                new User("jm", "지민", "jmpassword", Level.SILVER, MIN_LOGCOUNT_FOR_SILVER, MIN_RECCOMEND_FOR_GOLD+1),
-                new User("rm", "남준", "rmpassword", Level.GOLD, MIN_LOGCOUNT_FOR_SILVER, MIN_RECCOMEND_FOR_GOLD+1)
+                new User("jk", "정국", "jkpassword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER-1, MIN_RECCOMEND_FOR_GOLD-1, "jk@solip.com"),
+                new User("jin", "진", "jinpassword", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER, MIN_RECCOMEND_FOR_GOLD-1, "jin@solip.com"),
+                new User("v", "태형", "vpassword", Level.SILVER, MIN_LOGCOUNT_FOR_SILVER, MIN_RECCOMEND_FOR_GOLD-1, "v@solip.com"),
+                new User("jm", "지민", "jmpassword", Level.SILVER, MIN_LOGCOUNT_FOR_SILVER, MIN_RECCOMEND_FOR_GOLD+1,"jm@solip.com"),
+                new User("rm", "남준", "rmpassword", Level.GOLD, MIN_LOGCOUNT_FOR_SILVER, MIN_RECCOMEND_FOR_GOLD+1,"rm@solip.com")
         );
     }
 
