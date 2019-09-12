@@ -1,14 +1,17 @@
 package Proxy;
 
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.aop.framework.ProxyFactoryBean;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-public class ReflectionTest {
+public class DynamicProxyTest {
 
     @Test
     public void invokeMethod() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -56,4 +59,23 @@ public class ReflectionTest {
 
     }
 
+    @Test
+    public void proxyFactoryBean() {
+        ProxyFactoryBean pfBean = new ProxyFactoryBean();
+        pfBean.setTarget(new HelloTarget());
+        pfBean.addAdvice(new UppercaseAdvice());
+
+        Hello proxiedHello = (Hello) pfBean.getObject();
+
+        Assert.assertThat(proxiedHello.sayHello("Toby"), CoreMatchers.is("HELLO TOBY"));
+        Assert.assertThat(proxiedHello.sayHi("Toby"), CoreMatchers.is("HI TOBY"));
+        Assert.assertThat(proxiedHello.sayThankYou("Toby"), CoreMatchers.is("THANK YOU TOBY"));
+    }
+
+    private class UppercaseAdvice implements MethodInterceptor {
+        public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+            String ret = (String) methodInvocation.proceed();
+            return ret.toUpperCase();
+        }
+    }
 }
