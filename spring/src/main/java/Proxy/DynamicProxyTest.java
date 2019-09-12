@@ -5,6 +5,8 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.aop.ClassFilter;
+import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.NameMatchMethodPointcut;
@@ -81,6 +83,46 @@ public class DynamicProxyTest {
         public Object invoke(MethodInvocation methodInvocation) throws Throwable {
             String ret = (String) methodInvocation.proceed();
             return ret.toUpperCase();
+        }
+    }
+
+    @Test
+    public void classNamePointcutAdvice() {
+        NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut() {
+            @Override
+            public ClassFilter getClassFilter() {
+                return new ClassFilter() {
+                    public boolean matches(Class<?> aClass) {
+                        return aClass.getSimpleName().startsWith("HelloT");
+                    }
+                };
+            }
+        };
+        pointcut.addMethodName("sayH*");
+
+        checkAdviced(new HelloTarget(), pointcut, true);
+
+        class HelloWorld extends HelloTarget {};
+        checkAdviced(new HelloWorld(), pointcut, false);
+
+        class HelloToby extends HelloTarget {};
+        checkAdviced(new HelloToby(), pointcut, true);
+    }
+
+    private void checkAdviced(Hello target, Pointcut pointcut, boolean adviced) {
+        ProxyFactoryBean pfBean = new ProxyFactoryBean();
+        pfBean.setTarget(target);
+        pfBean.addAdvisor(new DefaultPointcutAdvisor(pointcut, new UppercaseAdvice()));
+        Hello hello = (Hello) pfBean.getObject();
+
+        if(adviced) {
+            Assert.assertThat(hello.sayHello("Toby"), CoreMatchers.is("HELLO TOBY"));
+            Assert.assertThat(hello.sayHi("Toby"), CoreMatchers.is("HI TOBY"));
+            Assert.assertThat(hello.sayThankYou("Toby"), CoreMatchers.is("Thank you Toby"));
+        } else {
+            Assert.assertThat(hello.sayHello("Toby"), CoreMatchers.is("Hello Toby"));
+            Assert.assertThat(hello.sayHi("Toby"), CoreMatchers.is("Hi Toby"));
+            Assert.assertThat(hello.sayThankYou("Toby"), CoreMatchers.is("Thank you Toby"));
         }
     }
 }
