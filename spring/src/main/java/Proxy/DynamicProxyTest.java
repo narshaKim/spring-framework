@@ -6,6 +6,8 @@ import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactoryBean;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.NameMatchMethodPointcut;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -61,15 +63,18 @@ public class DynamicProxyTest {
 
     @Test
     public void proxyFactoryBean() {
+
         ProxyFactoryBean pfBean = new ProxyFactoryBean();
         pfBean.setTarget(new HelloTarget());
-        pfBean.addAdvice(new UppercaseAdvice());
+        NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
+        pointcut.setMappedName("sayH*");
+        pfBean.addAdvisor(new DefaultPointcutAdvisor(pointcut, new UppercaseAdvice()));
 
         Hello proxiedHello = (Hello) pfBean.getObject();
 
         Assert.assertThat(proxiedHello.sayHello("Toby"), CoreMatchers.is("HELLO TOBY"));
         Assert.assertThat(proxiedHello.sayHi("Toby"), CoreMatchers.is("HI TOBY"));
-        Assert.assertThat(proxiedHello.sayThankYou("Toby"), CoreMatchers.is("THANK YOU TOBY"));
+        Assert.assertThat(proxiedHello.sayThankYou("Toby"), CoreMatchers.is("Thank you Toby"));
     }
 
     private class UppercaseAdvice implements MethodInterceptor {
