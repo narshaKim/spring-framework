@@ -1,4 +1,4 @@
-package Reflection;
+package Proxy;
 
 public class HelloTarget implements Hello {
 

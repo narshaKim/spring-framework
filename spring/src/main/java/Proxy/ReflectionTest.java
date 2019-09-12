@@ -1,4 +1,4 @@
-package Reflection;
+package Proxy;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
