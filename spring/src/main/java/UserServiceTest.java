@@ -1,4 +1,5 @@
 import Proxy.TrasactionHandler;
+import Proxy.TxProxyFactoryBean;
 import component.MockMailSender;
 import dao.MockUserDao;
 import dao.UserDao;
@@ -10,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.mail.MailSender;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -19,7 +21,6 @@ import service.TestUserService;
 import service.UserService;
 import service.UserServiceImpl;
 
-import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,6 +30,9 @@ import static service.UserServiceImpl.MIN_RECCOMEND_FOR_GOLD;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "/applicationContext.xml")
 public class UserServiceTest {
+
+    @Autowired
+    ApplicationContext context;
 
     @Autowired
     UserServiceImpl userServiceImpl;
@@ -112,6 +116,7 @@ public class UserServiceTest {
     }
 
     @Test
+    @DirtiesContext
     public void upgradeAllOrNothing() {
         UserServiceImpl testUserService = new TestUserService(users.get(3).getId());
         testUserService.setUserDao(userDao);
@@ -122,11 +127,10 @@ public class UserServiceTest {
         trasactionHandler.setTarget(testUserService);
         trasactionHandler.setPattern("upgradeLevels");
 
-        UserService txUserService = (UserService) Proxy.newProxyInstance(
-                getClass().getClassLoader(),
-                new Class[] {UserService.class},
-                trasactionHandler
-        );
+        TxProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", TxProxyFactoryBean.class);
+        txProxyFactoryBean.setTarget(testUserService);
+
+        UserService txUserService = (UserService) txProxyFactoryBean.getObject();
 
         userDao.deleteAll();
         for(User user : users) userDao.add(user);
