@@ -1,3 +1,4 @@
+import Reflection.TrasactionHandler;
 import component.MockMailSender;
 import dao.MockUserDao;
 import dao.UserDao;
@@ -15,9 +16,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import service.TestUserService;
+import service.UserService;
 import service.UserServiceImpl;
-import service.UserServiceTx;
 
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.List;
 
@@ -115,10 +117,16 @@ public class UserServiceTest {
         testUserService.setUserDao(userDao);
         testUserService.setMailSender(mailSender);
 
+        TrasactionHandler trasactionHandler = new TrasactionHandler();
+        trasactionHandler.setTransactionManager(transactionManager);
+        trasactionHandler.setTarget(testUserService);
+        trasactionHandler.setPattern("upgradeLevels");
 
-        UserServiceTx txUserService = new UserServiceTx();
-        txUserService.setTransactionManager(transactionManager);
-        txUserService.setUserService(testUserService);
+        UserService txUserService = (UserService) Proxy.newProxyInstance(
+                getClass().getClassLoader(),
+                new Class[] {UserService.class},
+                trasactionHandler
+        );
 
         userDao.deleteAll();
         for(User user : users) userDao.add(user);
