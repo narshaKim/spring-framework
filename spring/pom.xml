@@ -25,6 +25,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/aspectj/aspectjtools -->
+        <dependency>
+            <groupId>aspectj</groupId>
+            <artifactId>aspectjtools</artifactId>
+            <version>1.5.0</version>
+        </dependency>
+
     </dependencies>
 
 </project>
