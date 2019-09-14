@@ -1,10 +1,9 @@
-import Proxy.TrasactionHandler;
-import Proxy.TxProxyFactoryBean;
 import component.MockMailSender;
 import dao.MockUserDao;
 import dao.UserDao;
 import domain.Level;
 import domain.User;
+import exception.TestUserServiceException;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,10 +16,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
-import service.TestUserService;
 import service.UserService;
 import service.UserServiceImpl;
 
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,7 +34,9 @@ public class UserServiceTest {
     ApplicationContext context;
 
     @Autowired
-    UserServiceImpl userServiceImpl;
+    UserService userService;
+    @Autowired
+    UserService testService;
 
     @Autowired
     UserDao userDao;
@@ -57,11 +58,6 @@ public class UserServiceTest {
                 new User("jm", "지민", "jmpassword", Level.SILVER, MIN_LOGCOUNT_FOR_SILVER, MIN_RECCOMEND_FOR_GOLD+1,"jm@solip.com"),
                 new User("rm", "남준", "rmpassword", Level.GOLD, MIN_LOGCOUNT_FOR_SILVER, MIN_RECCOMEND_FOR_GOLD+1,"rm@solip.com")
         );
-    }
-
-    @Test
-    public void bean() {
-        Assert.assertThat(this.userServiceImpl, CoreMatchers.is(CoreMatchers.<UserServiceImpl>notNullValue()));
     }
 
     @Test
@@ -118,29 +114,21 @@ public class UserServiceTest {
     @Test
     @DirtiesContext
     public void upgradeAllOrNothing() {
-        UserServiceImpl testUserService = new TestUserService(users.get(3).getId());
-        testUserService.setUserDao(userDao);
-        testUserService.setMailSender(mailSender);
-
-        TrasactionHandler trasactionHandler = new TrasactionHandler();
-        trasactionHandler.setTransactionManager(transactionManager);
-        trasactionHandler.setTarget(testUserService);
-        trasactionHandler.setPattern("upgradeLevels");
-
-        TxProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", TxProxyFactoryBean.class);
-        txProxyFactoryBean.setTarget(testUserService);
-
-        UserService txUserService = (UserService) txProxyFactoryBean.getObject();
-
         userDao.deleteAll();
         for(User user : users) userDao.add(user);
 
         try {
-            txUserService.upgradeLevels();
+            testService.upgradeLevels();
             Assert.fail("TestUserServiceException expected");
         } catch (Exception e) {}
 
         checkLevelUpgraded(users.get(1), false);
+    }
+
+    @Test
+    public void advisorAutoProxyCreator() {
+        Assert.assertThat(context.getBean("testService"), CoreMatchers.is(Proxy.class));
+        Assert.assertThat(context.getBean("userService"), CoreMatchers.is(Proxy.class));
     }
 
     private void checkLevelUpgraded(User user, boolean upgraded) {
@@ -149,6 +137,18 @@ public class UserServiceTest {
             Assert.assertThat(userUpdate.getLevel(), CoreMatchers.is(user.getLevel().nextValue()));
         else
             Assert.assertThat(userUpdate.getLevel(), CoreMatchers.is(user.getLevel()));
+    }
+
+    static class TestUserServiceImpl extends UserServiceImpl {
+
+        private String id = "jm";
+
+        @Override
+        public void upgradeLevel(User user) {
+            if(user.getId().equals(this.id))
+                throw new TestUserServiceException();
+            super.upgradeLevel(user);
+        }
     }
 
 }
