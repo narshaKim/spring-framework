@@ -1,6 +1,5 @@
 import component.MockMailSender;
 import dao.MockUserDao;
-import dao.UserDao;
 import domain.Level;
 import domain.User;
 import exception.TestUserServiceException;
@@ -15,7 +14,6 @@ import org.springframework.mail.MailSender;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.PlatformTransactionManager;
 import service.UserService;
 import service.UserServiceImpl;
 
@@ -37,12 +35,6 @@ public class UserServiceTest {
     UserService userService;
     @Autowired
     UserService testService;
-
-    @Autowired
-    UserDao userDao;
-
-    @Autowired
-    PlatformTransactionManager transactionManager;
 
     @Autowired
     MailSender mailSender;
@@ -114,8 +106,8 @@ public class UserServiceTest {
     @Test
     @DirtiesContext
     public void upgradeAllOrNothing() {
-        userDao.deleteAll();
-        for(User user : users) userDao.add(user);
+        testService.deleteAll();
+        for(User user : users) testService.add(user);
 
         try {
             testService.upgradeLevels();
@@ -132,7 +124,7 @@ public class UserServiceTest {
     }
 
     private void checkLevelUpgraded(User user, boolean upgraded) {
-        User userUpdate = userDao.get(user.getId());
+        User userUpdate = userService.get(user.getId());
         if(upgraded)
             Assert.assertThat(userUpdate.getLevel(), CoreMatchers.is(user.getLevel().nextValue()));
         else
