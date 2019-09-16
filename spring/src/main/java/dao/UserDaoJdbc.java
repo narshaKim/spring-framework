@@ -8,10 +8,16 @@ import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 public class UserDaoJdbc implements UserDao {
 
     private JdbcTemplate jdbcTemplate;
+
+    private Map<String, String> sqlMap;
+    public void setSqlMap(Map<String, String> sqlMap) {
+        this.sqlMap = sqlMap;
+    }
 
     RowMapper<User> rowMapper = new RowMapper<User>() {
         public User mapRow(ResultSet resultSet, int i) throws SQLException {
@@ -31,11 +37,11 @@ public class UserDaoJdbc implements UserDao {
     }
 
     public void deleteAll() {
-        jdbcTemplate.update("DELETE FROM USERS");
+        jdbcTemplate.update(sqlMap.get("delete"));
     }
 
     public void add(final User user) {
-        jdbcTemplate.update("INSERT INTO USERS(ID, NAME, PASSWORD, LEVEL, LOGIN, RECOMMEND, EMAIL) VALUES(?,?,?,?,?,?,?)",
+        jdbcTemplate.update(sqlMap.get("add"),
                 user.getId(),
                 user.getName(),
                 user.getPassword(),
@@ -47,7 +53,7 @@ public class UserDaoJdbc implements UserDao {
     }
 
     public void update(User user) {
-        jdbcTemplate.update("UPDATE USERS SET NAME=?, PASSWORD=?, LEVEL=?, LOGIN=?, RECOMMEND=?, EMAIL=? WHERE ID=?",
+        jdbcTemplate.update(sqlMap.get("update"),
                 user.getName(),
                 user.getPassword(),
                 user.getLevel().intValue(),
@@ -59,7 +65,7 @@ public class UserDaoJdbc implements UserDao {
     }
 
     public int getCount() {
-        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM USERS", new RowMapper<Integer>() {
+        return jdbcTemplate.queryForObject(sqlMap.get("count"), new RowMapper<Integer>() {
             public Integer mapRow(ResultSet resultSet, int i) throws SQLException {
                 return resultSet.getInt(1);
             }
@@ -67,10 +73,10 @@ public class UserDaoJdbc implements UserDao {
     }
 
     public User get(final String id) {
-        return jdbcTemplate.queryForObject("SELECT * FROM USERS WHERE ID=?", new Object[]{id}, this.rowMapper);
+        return jdbcTemplate.queryForObject(sqlMap.get("get"), new Object[]{id}, this.rowMapper);
     }
 
     public List<User> getAll() {
-        return jdbcTemplate.query("SELECT * FROM USERS ORDER BY ID ASC", this.rowMapper);
+        return jdbcTemplate.query(sqlMap.get("getAll"), this.rowMapper);
     }
 }

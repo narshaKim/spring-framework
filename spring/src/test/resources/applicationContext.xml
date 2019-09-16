@@ -14,6 +14,16 @@
 
     <bean id="userDao" class="dao.UserDaoJdbc">
         <property name="jdbcTemplate" ref="jdbcTemplate"/>
+        <property name="sqlMap">
+            <map>
+                <entry key="add" value="INSERT INTO USERS(ID, NAME, PASSWORD, LEVEL, LOGIN, RECOMMEND, EMAIL) VALUES(?,?,?,?,?,?,?)" />
+                <entry key="update" value="UPDATE USERS SET NAME=?, PASSWORD=?, LEVEL=?, LOGIN=?, RECOMMEND=?, EMAIL=? WHERE ID=?" />
+                <entry key="delete" value="DELETE FROM USERS" />
+                <entry key="count" value="SELECT COUNT(*) FROM USERS" />
+                <entry key="get" value="SELECT * FROM USERS WHERE ID=?" />
+                <entry key="getAll" value="SELECT * FROM USERS ORDER BY ID ASC" />
+            </map>
+        </property>
     </bean>
 
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
