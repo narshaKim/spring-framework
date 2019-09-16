@@ -14,14 +14,18 @@
 
     <bean id="userDao" class="dao.UserDaoJdbc">
         <property name="jdbcTemplate" ref="jdbcTemplate"/>
+        <property name="sqlService" ref="sqlService"/>
+    </bean>
+
+    <bean id="sqlService" class="service.SqlServiceImpl">
         <property name="sqlMap">
             <map>
-                <entry key="add" value="INSERT INTO USERS(ID, NAME, PASSWORD, LEVEL, LOGIN, RECOMMEND, EMAIL) VALUES(?,?,?,?,?,?,?)" />
-                <entry key="update" value="UPDATE USERS SET NAME=?, PASSWORD=?, LEVEL=?, LOGIN=?, RECOMMEND=?, EMAIL=? WHERE ID=?" />
-                <entry key="delete" value="DELETE FROM USERS" />
-                <entry key="count" value="SELECT COUNT(*) FROM USERS" />
-                <entry key="get" value="SELECT * FROM USERS WHERE ID=?" />
-                <entry key="getAll" value="SELECT * FROM USERS ORDER BY ID ASC" />
+                <entry key="userAdd" value="INSERT INTO USERS(ID, NAME, PASSWORD, LEVEL, LOGIN, RECOMMEND, EMAIL) VALUES(?,?,?,?,?,?,?)" />
+                <entry key="userUpdate" value="UPDATE USERS SET NAME=?, PASSWORD=?, LEVEL=?, LOGIN=?, RECOMMEND=?, EMAIL=? WHERE ID=?" />
+                <entry key="userDelete" value="DELETE FROM USERS" />
+                <entry key="userCount" value="SELECT COUNT(*) FROM USERS" />
+                <entry key="userGet" value="SELECT * FROM USERS WHERE ID=?" />
+                <entry key="userGetAll" value="SELECT * FROM USERS ORDER BY ID ASC" />
             </map>
         </property>
     </bean>
