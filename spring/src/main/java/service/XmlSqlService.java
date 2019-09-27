@@ -2,8 +2,8 @@ package service;
 
 import JAXB.SqlType;
 import JAXB.Sqlmap;
-import dao.UserDao;
 
+import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -15,12 +15,19 @@ public class XmlSqlService implements SqlService {
 
     private Map<String, String> sqlMap = new HashMap<String, String>();
 
-    public XmlSqlService() {
+    private String sqlmapFile;
+
+    public void setSqlmapFile(String sqlmapFile) {
+        this.sqlmapFile = sqlmapFile;
+    }
+
+    @PostConstruct
+    public void loadSql() {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Sqlmap.class);
 
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            InputStream is = getClass().getResourceAsStream("/sqlmap.xml");
+            InputStream is = getClass().getResourceAsStream(sqlmapFile);
             Sqlmap sqlmap = (Sqlmap) unmarshaller.unmarshal(is);
 
             for(SqlType sql : sqlmap.getSql()) {
