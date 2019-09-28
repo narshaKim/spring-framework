@@ -1,10 +1,8 @@
-package service;
+package sql;
 
 import JAXB.SqlType;
 import JAXB.Sqlmap;
-import sql.SqlNotFoundException;
-import sql.SqlReader;
-import sql.SqlRegistry;
+import service.SqlRetrievalFailureException;
 
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;

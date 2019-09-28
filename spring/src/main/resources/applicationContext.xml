@@ -19,7 +19,7 @@
         <property name="sqlService" ref="sqlService"/>
     </bean>
 
-    <bean id="sqlService" class="service.XmlSqlService">
+    <bean id="sqlService" class="sql.XmlSqlService">
         <property name="sqlmapFile" value="/sqlmap.xml"/>
         <property name="sqlReader" ref="sqlService"/>
         <property name="sqlRegistry" ref="sqlService" />

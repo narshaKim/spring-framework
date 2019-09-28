@@ -1,4 +1,6 @@
-package service;
+package sql;
+
+import service.SqlRetrievalFailureException;
 
 import java.util.Map;
 

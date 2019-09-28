@@ -4,7 +4,7 @@ import domain.Level;
 import domain.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import service.SqlService;
+import sql.SqlService;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
