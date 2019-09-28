@@ -21,6 +21,8 @@
 
     <bean id="sqlService" class="service.XmlSqlService">
         <property name="sqlmapFile" value="/sqlmap.xml"/>
+        <property name="sqlReader" ref="sqlService"/>
+        <property name="sqlRegistry" ref="sqlService" />
     </bean>
 
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
