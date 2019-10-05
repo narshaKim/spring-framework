@@ -19,12 +19,8 @@
         <property name="sqlService" ref="sqlService"/>
     </bean>
 
-    <bean id="unmarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
-        <property name="classesToBeBound">
-            <list>
-                <value>JAXB.Sqlmap</value>
-            </list>
-        </property>
+    <bean id="unmarshaller" class="org.springframework.oxm.castor.CastorMarshaller">
+        <property name="mappingLocation" value="mapping.xml"/>
     </bean>
 
     <bean id="sqlService" class="sql.DefaultSqlService" />
