@@ -29,7 +29,7 @@
 
     <bean id="sqlService" class="sql.OxmSqlService" >
         <property name="unmarshaller" ref="unmarshaller"/>
-        <property name="sqlmapFile" value="/sqlmap.xml"/>
+        <property name="sqlmap" value="classpath:sqlmap.xml"/>
     </bean>
 
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
