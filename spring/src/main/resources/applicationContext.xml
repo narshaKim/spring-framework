@@ -30,6 +30,10 @@
     <bean id="sqlService" class="sql.OxmSqlService" >
         <property name="unmarshaller" ref="unmarshaller"/>
         <property name="sqlmap" value="classpath:sqlmap.xml"/>
+        <property name="sqlRegistry" ref="sqlRegistry"/>
+    </bean>
+
+    <bean id="sqlRegistry" class="sql.ConcurrentHashMapSqlRegistry">
     </bean>
 
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
