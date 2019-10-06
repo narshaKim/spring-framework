@@ -36,7 +36,9 @@
     </bean>
 
     <!-- SQL 등록자 -->
-    <bean id="sqlRegistry" class="sql.ConcurrentHashMapSqlRegistry" />
+    <bean id="sqlRegistry" class="sql.EmbeddedSqlRegistry">
+        <property name="dataSource" ref="embeddedDatabase" />
+    </bean>
 
     <!-- SQL 서비스 -->
     <bean id="sqlService" class="sql.OxmSqlService" >
