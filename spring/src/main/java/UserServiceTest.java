@@ -25,7 +25,7 @@ import static service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
 import static service.UserServiceImpl.MIN_RECCOMEND_FOR_GOLD;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "/applicationContext.xml")
+@ContextConfiguration(classes = TestApplicationContext.class)
 public class UserServiceTest {
 
     @Autowired
@@ -131,7 +131,7 @@ public class UserServiceTest {
             Assert.assertThat(userUpdate.getLevel(), CoreMatchers.is(user.getLevel()));
     }
 
-    static class TestUserServiceImpl extends UserServiceImpl {
+    public static class TestUserServiceImpl extends UserServiceImpl {
 
         private String id = "jm";
 
