@@ -1,7 +1,8 @@
 import component.DummyMailSender;
 import dao.UserDao;
-import dao.UserDaoJdbc;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
@@ -13,7 +14,6 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import service.UserService;
-import service.UserServiceImpl;
 import sql.EmbeddedSqlRegistry;
 import sql.OxmSqlService;
 import sql.SqlRegistry;
@@ -23,7 +23,11 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableTransactionManagement
+@ComponentScan(basePackages="dao")
 public class TestApplicationContext {
+
+    @Autowired
+    private UserDao userDao;
 
     /** DB */
     @Bean
@@ -34,24 +38,6 @@ public class TestApplicationContext {
         dataSource.setUsername("root");
         dataSource.setPassword("root");
         return dataSource;
-    }
-
-    /** DAO */
-    @Bean
-    public UserDao userDao() {
-        UserDaoJdbc userDao = new UserDaoJdbc();
-        userDao.setDataSource(dataSource());
-        userDao.setSqlService(sqlService());
-        return userDao;
-    }
-
-    /** 서비스 */
-    @Bean
-    public UserService userService() {
-        UserServiceImpl userService = new UserServiceImpl();
-        userService.setUserDao(userDao());
-        userService.setMailSender(mailSender());
-        return userService;
     }
 
     /** 메일 송신자 */
@@ -75,7 +61,7 @@ public class TestApplicationContext {
     public UserService testService() {
         UserServiceTest.TestUserServiceImpl testService = new UserServiceTest.TestUserServiceImpl();
         testService.setMailSender(mailSender());
-        testService.setUserDao(userDao());
+        testService.setUserDao(userDao);
         return testService;
     }
 

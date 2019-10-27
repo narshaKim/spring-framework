@@ -119,8 +119,8 @@ public class UserServiceTest {
 
     @Test
     public void advisorAutoProxyCreator() {
-        Assert.assertThat(context.getBean("testService"), CoreMatchers.is(Proxy.class));
-        Assert.assertThat(context.getBean("userService"), CoreMatchers.is(Proxy.class));
+        Assert.assertThat(testService, CoreMatchers.is(Proxy.class));
+        Assert.assertThat(userService, CoreMatchers.is(Proxy.class));
     }
 
     private void checkLevelUpgraded(User user, boolean upgraded) {
