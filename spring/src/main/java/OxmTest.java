@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = TestApplicationContext.class)
+@ContextConfiguration(classes = {AppContext.class, TestAppContext.class})
 public class OxmTest {
 
     @Autowired

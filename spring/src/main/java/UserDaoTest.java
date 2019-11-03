@@ -17,7 +17,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = TestApplicationContext.class)
+@ContextConfiguration(classes = {AppContext.class, TestAppContext.class})
 public class UserDaoTest {
 
     @Autowired
