@@ -9,9 +9,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.mail.MailSender;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import service.UserService;
@@ -25,19 +27,20 @@ import static service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
 import static service.UserServiceImpl.MIN_RECCOMEND_FOR_GOLD;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {AppContext.class, TestAppContext.class})
+@ActiveProfiles("test")
+@ContextConfiguration(classes = AppContext.class)
 public class UserServiceTest {
 
     @Autowired
     ApplicationContext context;
-
     @Autowired
     UserService userService;
     @Autowired
     UserService testService;
-
     @Autowired
     MailSender mailSender;
+    @Autowired
+    DefaultListableBeanFactory bf;
 
     List<User> users;
 
@@ -121,6 +124,13 @@ public class UserServiceTest {
     public void advisorAutoProxyCreator() {
         Assert.assertThat(testService, CoreMatchers.is(Proxy.class));
         Assert.assertThat(userService, CoreMatchers.is(Proxy.class));
+    }
+
+    @Test
+    public void beans() {
+        for(String n : bf.getBeanDefinitionNames()) {
+            System.out.println(n + " \t "+bf.getBean(n).getClass().getName());
+        }
     }
 
     private void checkLevelUpgraded(User user, boolean upgraded) {
