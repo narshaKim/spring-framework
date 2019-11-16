@@ -1,4 +1,5 @@
 import domain.Hello;
+import domain.Printer;
 import domain.StringPrinter;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
@@ -7,7 +8,9 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 
 public class ApplicationContextTest {
@@ -58,5 +61,23 @@ public class ApplicationContextTest {
         hello.print();
 
         Assert.assertThat(ac.getBean("printer").toString(), CoreMatchers.is("Hello Spring"));
+    }
+
+    @Test
+    public void treeApplicationContext() {
+        ApplicationContext parent = new GenericXmlApplicationContext("/parent-context.xml");
+        GenericApplicationContext child = new GenericApplicationContext(parent);
+        XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(child);
+        reader.loadBeanDefinitions("/child-context.xml");
+        child.refresh();
+
+        Printer printer = child.getBean("printer", Printer.class);
+        Assert.assertThat(printer, CoreMatchers.is(CoreMatchers.<Printer>notNullValue()));
+
+        Hello hello = child.getBean("hello", Hello.class);
+        Assert.assertThat(hello, CoreMatchers.is(CoreMatchers.<Hello>notNullValue()));
+
+        hello.print();
+        Assert.assertThat(printer.toString(), CoreMatchers.is("Hello Child"));
     }
 }
