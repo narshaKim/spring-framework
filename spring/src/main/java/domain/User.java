@@ -51,8 +51,16 @@ public class User {
         return level;
     }
 
+    public int getLevelInt() {
+        return level.intValue();
+    }
+
     public void setLevel(Level level) {
         this.level = level;
+    }
+
+    public void setLevelInt(int level) {
+        this.level = Level.valueOf(level);
     }
 
     public int getLogin() {

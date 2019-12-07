@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <sqlmap>
-    <sql key="userAdd">INSERT INTO USERS(ID, NAME, PASSWORD, LEVEL, LOGIN, RECOMMEND, EMAIL) VALUES(?,?,?,?,?,?,?)</sql>
-    <sql key="userUpdate">UPDATE USERS SET NAME=?, PASSWORD=?, LEVEL=?, LOGIN=?, RECOMMEND=?, EMAIL=? WHERE ID=?</sql>
+    <sql key="userAdd">INSERT INTO USERS(ID, NAME, PASSWORD, LEVEL, LOGIN, RECOMMEND, EMAIL) VALUES(:id,:name,:password,:levelInt,:login,:recommend,:email)</sql>
+    <sql key="userUpdate">UPDATE USERS SET NAME=:name, PASSWORD=:password, LEVEL=:levelInt, LOGIN=:login, RECOMMEND=:recommend, EMAIL=:email WHERE ID=:id</sql>
     <sql key="userDelete">DELETE FROM USERS</sql>
     <sql key="userCount">SELECT COUNT(*) FROM USERS</sql>
-    <sql key="userGet">SELECT * FROM USERS WHERE ID=?</sql>
-    <sql key="userGetAll">SELECT * FROM USERS ORDER BY ID ASC</sql>
+    <sql key="userGet">SELECT id, name, password, level AS levelInt, login, recommend, email FROM USERS WHERE ID=:id</sql>
+    <sql key="userGetAll">SELECT id, name, password, level AS levelInt, login, recommend, email FROM USERS ORDER BY ID ASC</sql>
 </sqlmap>

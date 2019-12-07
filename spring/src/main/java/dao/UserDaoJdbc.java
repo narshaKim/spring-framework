@@ -1,42 +1,35 @@
 package dao;
 
-import domain.Level;
 import domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SingleColumnRowMapper;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import sql.SqlService;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 @Repository
 public class UserDaoJdbc implements UserDao {
 
     private JdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private SimpleJdbcInsert simpleJdbcInsert;
 
     @Autowired
     private SqlService sqlService;
 
-    RowMapper<User> rowMapper = new RowMapper<User>() {
-        public User mapRow(ResultSet resultSet, int i) throws SQLException {
-            String id = resultSet.getString("ID");
-            String name = resultSet.getString("NAME");
-            String password = resultSet.getString("PASSWORD");
-            Level level = Level.valueOf(resultSet.getInt("LEVEL"));
-            int login = resultSet.getInt("LOGIN");
-            int recommend = resultSet.getInt("RECOMMEND");
-            String email = resultSet.getString("EMAIL");
-            return new User(id, name, password, level, login, recommend, email);
-        }
-    };
-
     @Autowired
     public void setDataSource(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        this.simpleJdbcInsert = new SimpleJdbcInsert(dataSource).withTableName("USERS").usingColumns("id", "name", "password", "level", "login", "recommend", "email");
     }
 
     public void deleteAll() {
@@ -44,42 +37,30 @@ public class UserDaoJdbc implements UserDao {
     }
 
     public void add(final User user) {
-        jdbcTemplate.update(sqlService.getSql("userAdd"),
-                user.getId(),
-                user.getName(),
-                user.getPassword(),
-                user.getLevel().intValue(),
-                user.getLogin(),
-                user.getRecommend(),
-                user.getEmail()
+        simpleJdbcInsert.execute(new MapSqlParameterSource()
+                .addValue("id", user.getId())
+                .addValue("name", user.getName())
+                .addValue("password", user.getPassword())
+                .addValue("level", user.getLevelInt())
+                .addValue("login", user.getLogin())
+                .addValue("recommend", user.getRecommend())
+                .addValue("email", user.getEmail())
         );
     }
 
     public void update(User user) {
-        jdbcTemplate.update(sqlService.getSql("userUpdate"),
-                user.getName(),
-                user.getPassword(),
-                user.getLevel().intValue(),
-                user.getLogin(),
-                user.getRecommend(),
-                user.getEmail(),
-                user.getId()
-        );
+        namedParameterJdbcTemplate.update(sqlService.getSql("userUpdate"), new BeanPropertySqlParameterSource(user));
     }
 
     public int getCount() {
-        return jdbcTemplate.queryForObject(sqlService.getSql("userCount"), new RowMapper<Integer>() {
-            public Integer mapRow(ResultSet resultSet, int i) throws SQLException {
-                return resultSet.getInt(1);
-            }
-        });
+        return jdbcTemplate.query(sqlService.getSql("userCount"), new SingleColumnRowMapper<Integer>(Integer.class)).get(0);
     }
 
     public User get(final String id) {
-        return jdbcTemplate.queryForObject(sqlService.getSql("userGet"), new Object[]{id}, this.rowMapper);
+        return namedParameterJdbcTemplate.queryForObject(sqlService.getSql("userGet"), new MapSqlParameterSource().addValue("id", id), new BeanPropertyRowMapper<User>(User.class));
     }
 
     public List<User> getAll() {
-        return jdbcTemplate.query(sqlService.getSql("userGetAll"), this.rowMapper);
+        return jdbcTemplate.query(sqlService.getSql("userGetAll"), new BeanPropertyRowMapper<User>(User.class));
     }
 }
