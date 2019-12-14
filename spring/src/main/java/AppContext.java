@@ -1,6 +1,9 @@
 import component.DummyMailSender;
+import org.mybatis.spring.SqlSessionFactoryBean;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.mail.MailSender;
@@ -45,6 +48,20 @@ public class AppContext {
         DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
         transactionManager.setDataSource(dataSource());
         return transactionManager;
+    }
+
+    @Bean
+    public SqlSessionTemplate sqlSessionTemplate() throws Exception {
+        SqlSessionFactoryBean sqlSessionFactoryBean = sqlSessionFactoryBean();
+        return new SqlSessionTemplate(sqlSessionFactoryBean.getObject());
+    }
+
+    @Bean
+    public SqlSessionFactoryBean sqlSessionFactoryBean() {
+        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+        sqlSessionFactoryBean.setDataSource(dataSource());
+        sqlSessionFactoryBean.setConfigLocation(new ClassPathResource("mybatis-config.xml"));
+        return sqlSessionFactoryBean;
     }
 
     @Configuration
